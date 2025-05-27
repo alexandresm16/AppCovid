@@ -118,6 +118,7 @@ class _PacienteScreanState extends State<PacienteScrean> {
                         this._cartaoController.text,
                         int.tryParse(this._idadeController.text) ?? 0,
                         this._senhaController.text,
+                        this._fotoPerfil
                       );
 
                       PacienteDAO.adicionar(p);

@@ -1,3 +1,6 @@
+import 'dart:io';
+import 'dart:math';
+
 import 'package:aula/database/paciente_dao.dart';
 import 'package:aula/model/Paciente.dart';
 import 'package:flutter/cupertino.dart';
@@ -72,14 +75,43 @@ class ItemPaciente extends StatelessWidget {
 
   ItemPaciente(this._paciente);
 
+  Widget _avatarAntigo(){
+    return CircleAvatar(
+      backgroundImage: AssetImage('imagens/avatar.png'),
+    );
+  }
+
+  Widget _avatarFotoPerfil(){
+
+    final random = Random();
+
+// Gera uma cor aleatória clara a partir da paleta de cores principais do Material
+    Color cor = Colors.primaries[random.nextInt(Colors.primaries.length)][
+    random.nextInt(9) * 100
+    ]!;
+
+    var iniciaNome = this._paciente.nome[0].toUpperCase();
+    if(this._paciente.foto.length> 0){
+      iniciaNome = '';
+    }
+
+    return CircleAvatar(
+      backgroundColor: cor,
+      foregroundColor: Colors.white,
+      backgroundImage: FileImage(File(this._paciente.foto)),
+      radius: 22.0,
+      child: Text(iniciaNome,
+        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 30.0),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
       children: <Widget>[
         ListTile(
-          leading: CircleAvatar(
-            backgroundImage: AssetImage('imagens/avatar.png'),
-          ),
+          leading: _avatarFotoPerfil(),
           title: Text(this._paciente.nome, style: TextStyle(fontSize: 22)),
           subtitle: Text(this._paciente.email, style: TextStyle(fontSize: 16)),
           trailing: _menu(),

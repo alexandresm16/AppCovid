@@ -5,6 +5,7 @@ class Paciente {
   String _cartao;
   int _idade;
   String _senha;
+  String _foto;
 
   Paciente(
     this._id,
@@ -13,6 +14,7 @@ class Paciente {
     this._cartao,
     this._idade,
     this._senha,
+    this._foto,
   );
 
   int get id {
@@ -37,5 +39,9 @@ class Paciente {
 
   String get senha {
     return this._senha;
+  }
+
+  String get foto {
+    return this._foto;
   }
 }
