@@ -1,11 +1,14 @@
 import 'dart:io';
 import 'dart:math';
 
+import 'package:aula/database/check_sintomasDAO.dart';
 import 'package:aula/database/paciente_dao.dart';
+import 'package:aula/model/Check_sintomas.dart';
 import 'package:aula/model/Paciente.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
+import '../checklist/checklist_sintomas.dart';
 import 'paciente_add.dart';
 
 class PacienteList extends StatefulWidget {
@@ -40,9 +43,17 @@ class _PacienteListState extends State<PacienteList> {
                 itemCount: _pacientes.length,
                 itemBuilder: (context, index) {
                   final Paciente p = _pacientes[index];
-                  return ItemPaciente(p);
-                },
-              ),
+                  p.id = index;
+                  return ItemPaciente(p, onClick: (){
+                    Navigator.of(context).push(MaterialPageRoute(
+                        builder: (context)=> PacienteScrean(index: index))
+                    ).then((value){
+                      setState(() {
+                        debugPrint('voltou do editar....');
+                      });
+                    });
+                  },);
+                },),
             ),
           ),
         ],
@@ -72,35 +83,41 @@ class _PacienteListState extends State<PacienteList> {
 
 class ItemPaciente extends StatelessWidget {
   final Paciente _paciente;
+  final Function onClick;
 
-  ItemPaciente(this._paciente);
+  ItemPaciente(this._paciente, {required this.onClick});
 
-  Widget _avatarAntigo(){
-    return CircleAvatar(
-      backgroundImage: AssetImage('imagens/avatar.png'),
-    );
-  }
+  //Widget _avatarAntigo(){
+  //   return CircleAvatar(
+  //     backgroundImage: AssetImage('imagens/avatar.png'),
+//    );
+//  }
 
-  Widget _avatarFotoPerfil(){
-
+  Widget _avatarFotoPerfil() {
     final random = Random();
 
-// Gera uma cor aleatória clara a partir da paleta de cores principais do Material
-    Color cor = Colors.primaries[random.nextInt(Colors.primaries.length)][
-    random.nextInt(9) * 100
-    ]!;
+    // Seleciona uma cor aleatória de forma segura
+    final MaterialColor corPrincipal = Colors.primaries[random.nextInt(Colors.primaries.length)];
+    final List<int> tonsDisponiveis = [100, 200, 300, 400, 500, 600, 700, 800, 900];
+    final int tom = tonsDisponiveis[random.nextInt(tonsDisponiveis.length)];
+    final Color cor = corPrincipal[tom] ?? Colors.grey;
 
-    var iniciaNome = this._paciente.nome[0].toUpperCase();
-    if(this._paciente.foto.length> 0){
-      iniciaNome = '';
+    String iniciaNome = '';
+    if (_paciente.nome.isNotEmpty) {
+      iniciaNome = _paciente.nome[0].toUpperCase();
     }
+
+    bool fotoValida = _paciente.foto.isNotEmpty && File(_paciente.foto).existsSync();
 
     return CircleAvatar(
       backgroundColor: cor,
       foregroundColor: Colors.white,
-      backgroundImage: FileImage(File(this._paciente.foto)),
+      backgroundImage: fotoValida ? FileImage(File(_paciente.foto)) : null,
       radius: 22.0,
-      child: Text(iniciaNome,
+      child: fotoValida
+          ? null
+          : Text(
+        iniciaNome,
         style: TextStyle(fontWeight: FontWeight.bold, fontSize: 30.0),
       ),
     );
@@ -111,10 +128,11 @@ class ItemPaciente extends StatelessWidget {
     return Column(
       children: <Widget>[
         ListTile(
+          onTap: () => this.onClick(),
           leading: _avatarFotoPerfil(),
           title: Text(this._paciente.nome, style: TextStyle(fontSize: 22)),
           subtitle: Text(this._paciente.email, style: TextStyle(fontSize: 16)),
-          trailing: _menu(),
+          trailing: _menu(context),
         ),
         Divider(
           color: Colors.green,
@@ -127,18 +145,32 @@ class ItemPaciente extends StatelessWidget {
     );
   }
 
-  Widget _menu() {
+  Widget _menu(BuildContext context) {
     return PopupMenuButton(
       onSelected: (ItensMenuListPaciente selecionado) {
+
+        if(selecionado == ItensMenuListPaciente.novo_checklist ){
+          Navigator.of(context).push(MaterialPageRoute(
+              builder: (context) => ChecklistSintomas(idpaciente: this._paciente.id)
+          ));
+        } else {
+
+          if(CheckSintomasDAO.getPacienteCheckSintomas(this._paciente).length > 0){
+            for(CheckSintomasModel csm in CheckSintomasDAO.getPacienteCheckSintomas(this._paciente)){
+
+              debugPrint(csm.toString());
+            }
+          }else{
+            debugPrint("Nenhum registro encontrado..........");
+          }
+
+        }
+
         debugPrint('selecionado .... $selecionado');
       },
 
       itemBuilder:
           (BuildContext context) => <PopupMenuItem<ItensMenuListPaciente>>[
-            const PopupMenuItem(
-              value: ItensMenuListPaciente.editar,
-              child: Text('Editar'),
-            ),
             const PopupMenuItem(
               value: ItensMenuListPaciente.resultados,
               child: Text('resultados'),
@@ -152,4 +184,4 @@ class ItemPaciente extends StatelessWidget {
   }
 }
 
-enum ItensMenuListPaciente { editar, resultados, novo_checklist }
+enum ItensMenuListPaciente { resultados, novo_checklist }

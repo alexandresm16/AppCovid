@@ -21,6 +21,10 @@ class Paciente {
     return this._id;
   }
 
+  set id(int id) {
+    this._id = id;
+  }
+
   String get nome {
     return this._nome;
   }

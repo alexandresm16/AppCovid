@@ -7,6 +7,19 @@ import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 
 class PacienteScrean extends StatefulWidget {
+
+
+  int? index;
+
+  PacienteScrean({this.index}){
+    this.index = index;
+
+    if(this.index == null) {
+      this.index = -1;
+    }
+
+  }
+
   @override
   State<PacienteScrean> createState() => _PacienteScreanState();
 }
@@ -26,8 +39,45 @@ class _PacienteScreanState extends State<PacienteScrean> {
 
   final _formKey = GlobalKey<FormState>();
 
+  late Paciente _paciente;
+  String _fotoPerfil = ''; // garantir que sempre exista um valor
+
+  @override
+  void initState() {
+    super.initState();
+
+    int index = widget.index ?? -1;
+
+    if (index >= 0) {
+      debugPrint('EDITAR INDEX = $index');
+      Paciente pacienteExistente = PacienteDAO.getPaciente(index);
+
+      _paciente = Paciente(
+        index,
+        pacienteExistente.nome,
+        pacienteExistente.email,
+        pacienteExistente.cartao,
+        pacienteExistente.idade,
+        pacienteExistente.senha,
+        pacienteExistente.foto,
+      );
+
+      _nomeController.text = _paciente.nome;
+      _emailController.text = _paciente.email;
+      _cartaoController.text = _paciente.cartao;
+      _idadeController.text = _paciente.idade.toString();
+      _senhaController.text = _paciente.senha;
+      _fotoPerfil = _paciente.foto;
+    } else {
+      // Novo paciente com dados padrão
+      _paciente = Paciente(0, '', '', '', 0, '', '');
+    }
+  }
+
+
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       appBar: AppBar(backgroundColor: Colors.blue, title: Text('ADD PACIENTE')),
       body: SingleChildScrollView(
@@ -111,8 +161,9 @@ class _PacienteScreanState extends State<PacienteScrean> {
                   ),
                   onPressed: () {
                     if (_formKey.currentState!.validate()) {
+                      int index = widget.index ?? -1;
                       Paciente p = new Paciente(
-                        0,
+                          index,
                         this._nomeController.text,
                         this._emailController.text,
                         this._cartaoController.text,
@@ -121,8 +172,14 @@ class _PacienteScreanState extends State<PacienteScrean> {
                         this._fotoPerfil
                       );
 
-                      PacienteDAO.adicionar(p);
-                      Navigator.of(context).pop();
+                      if (index >= 0) {
+                        PacienteDAO.atualizar(p);
+                        Navigator.of(context).pop();
+                      }else {
+                        PacienteDAO.adicionar(p);
+                        Navigator.of(context).pop();
+                      }
+
                     } else {
                       debugPrint('Formulário inválido');
                     }
@@ -148,7 +205,7 @@ class _PacienteScreanState extends State<PacienteScrean> {
       },
       child: CircleAvatar(
         radius: 65,
-        backgroundImage: _fotoPerfil.isNotEmpty
+        backgroundImage: _fotoPerfil.isNotEmpty && File(_fotoPerfil).existsSync()
             ? FileImage(File(_fotoPerfil))
             : AssetImage('imagens/camera.png') as ImageProvider,
         child: Align(
@@ -196,8 +253,6 @@ class _PacienteScreanState extends State<PacienteScrean> {
       },
     );
   }
-
-  String _fotoPerfil = '';
 
   Future<void> _obterImage(ImageSource source) async {
     try {
