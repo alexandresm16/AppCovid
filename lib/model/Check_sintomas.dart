@@ -27,6 +27,22 @@ class CheckSintomasModel {
     this._isCasoSuspeito,
   );
 
+  Map<String, dynamic> toMap(){
+    return{
+      'idpaciente' : _paciente.id,
+      'temp' : _temp,
+      'qtddiassintomas' : _qtdDiasSintomas,
+      'narizentupido' : _isNarizEntupido == true ? 1 : 0,
+      'dorgarganta' :  _isDorGarganta == true ? 1 : 0,
+      'rouquidao' : _isRouquidao == true ? 1 : 0,
+      'catarro' : _isCatarro == true ? 1 : 0,
+      'tosse' : _isTosse == true ? 1 : 0,
+      'dataavaliacao' : _dataAvaliacao.toIso8601String(),
+      'casosuspeito' : _isCasoSuspeito  == true ? 1 : 0,
+    };
+  }
+
+
   bool get isCasoSuspeito => _isCasoSuspeito;
 
   set isCasoSuspeito(bool value) {
@@ -61,7 +77,7 @@ class CheckSintomasModel {
   @override
   String toString() {
     // TODO: implement toString
-    return 'Paciente: id $id, nome: '+paciente.nome
+    return 'CHECKLIST SINTOMAS $_id: Paciente: '+paciente.id.toString()+' $_paciente.id, nome: '+paciente.nome
         +', temp: $_temp, '+', dias sintomas: $_qtdDiasSintomas'
         +', iscatarro: $_isCatarro'+', Tosse: $_isTosse'+', Roquidao: $_isRouquidao'
         +', Garganta: $_isDorGarganta'+', Nariz: $_isNarizEntupido'

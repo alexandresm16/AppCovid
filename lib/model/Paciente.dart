@@ -17,6 +17,18 @@ class Paciente {
     this._foto,
   );
 
+
+  Map<String, dynamic> toMap(){
+    return {
+    'nome' : _nome,
+    'email' : _email,
+    'cartao' : _cartao,
+    'idade' : _idade,
+    'senha' : _senha,
+    'foto' : _foto,
+    };
+  }
+
   int get id {
     return this._id;
   }

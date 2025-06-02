@@ -19,7 +19,7 @@ class PacienteList extends StatefulWidget {
 class _PacienteListState extends State<PacienteList> {
   @override
   Widget build(BuildContext context) {
-    List<Paciente> _pacientes = PacienteDAO.listarPacientes;
+    //List<Paciente> _pacientes = PacienteDAO.listarPacientes;
 
     return Scaffold(
       appBar: AppBar(backgroundColor: Colors.blue, title: Text('Pacientes')),
@@ -39,21 +39,7 @@ class _PacienteListState extends State<PacienteList> {
           Expanded(
             child: Container(
               //color: Colors.red,
-              child: ListView.builder(
-                itemCount: _pacientes.length,
-                itemBuilder: (context, index) {
-                  final Paciente p = _pacientes[index];
-                  p.id = index;
-                  return ItemPaciente(p, onClick: (){
-                    Navigator.of(context).push(MaterialPageRoute(
-                        builder: (context)=> PacienteScrean(index: index))
-                    ).then((value){
-                      setState(() {
-                        debugPrint('voltou do editar....');
-                      });
-                    });
-                  },);
-                },),
+              child: _futureBuilderPaciente(),
             ),
           ),
         ],
@@ -79,6 +65,65 @@ class _PacienteListState extends State<PacienteList> {
       ),
     );
   }
+
+  Widget _futureBuilderPaciente() {
+    return FutureBuilder<List<Paciente>>(
+      initialData: const <Paciente>[],
+      future: PacienteDAO().getPacientes(),
+      builder: (context, snapshot) {
+        switch (snapshot.connectionState) {
+          case ConnectionState.none:
+            return const Center(child: Text('Sem conexão.'));
+          case ConnectionState.waiting:
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: const [
+                  CircularProgressIndicator(),
+                  SizedBox(height: 16),
+                  Text('Carregando...'),
+                ],
+              ),
+            );
+          case ConnectionState.active:
+            return const Center(child: Text('Conexão ativa...'));
+          case ConnectionState.done:
+            if (snapshot.hasError) {
+              return const Center(child: Text('Erro ao carregar os dados.'));
+            }
+
+            final List<Paciente> pacientes = snapshot.data ?? [];
+
+            if (pacientes.isEmpty) {
+              return const Center(child: Text('Nenhum paciente encontrado.'));
+            }
+
+            return ListView.builder(
+              itemCount: pacientes.length,
+              itemBuilder: (context, index) {
+                final Paciente p = pacientes[index];
+                return ItemPaciente(
+                  p,
+                  onClick: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => PacienteScrean(paciente: p,),
+                      ),
+                    ).then((value) {
+                      setState(() {
+                        debugPrint('...........Voltou do editar');
+                      });
+                    });
+                  },
+                );
+              },
+            );
+        }
+      },
+    );
+  }
+
 }
 
 class ItemPaciente extends StatelessWidget {
@@ -151,21 +196,25 @@ class ItemPaciente extends StatelessWidget {
 
         if(selecionado == ItensMenuListPaciente.novo_checklist ){
           Navigator.of(context).push(MaterialPageRoute(
-              builder: (context) => ChecklistSintomas(idpaciente: this._paciente.id)
+              builder: (context) => ChecklistSintomas(paciente: this._paciente)
           ));
         } else {
 
-          if(CheckSintomasDAO.getPacienteCheckSintomas(this._paciente).length > 0){
-            for(CheckSintomasModel csm in CheckSintomasDAO.getPacienteCheckSintomas(this._paciente)){
+          CheckSintomasDAO().getPacienteCheckSintomas(this._paciente).then((sintomas) {
 
-              debugPrint(csm.toString());
+            if(sintomas.length > 0){
+
+              for(CheckSintomasModel csm in sintomas){
+                print(csm);
+              }
+
+            } else {
+              print('Nenhum registro encontrado');
             }
-          }else{
-            debugPrint("Nenhum registro encontrado..........");
-          }
 
+
+          });
         }
-
         debugPrint('selecionado .... $selecionado');
       },
 

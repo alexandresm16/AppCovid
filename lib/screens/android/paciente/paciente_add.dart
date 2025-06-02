@@ -7,17 +7,16 @@ import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 
 class PacienteScrean extends StatefulWidget {
-
-
   int? index;
+  Paciente? paciente;
 
-  PacienteScrean({this.index}){
-    this.index = index;
-
-    if(this.index == null) {
-      this.index = -1;
+  PacienteScrean({this.paciente}) {
+    if (paciente == null) {
+      index = -1;
+    } else {
+      index = paciente!.id;
+      this.paciente = paciente;
     }
-
   }
 
   @override
@@ -35,7 +34,6 @@ class _PacienteScreanState extends State<PacienteScrean> {
 
   final TextEditingController _senhaController = TextEditingController();
 
-  XFile? _imagemSelecionada;
 
   final _formKey = GlobalKey<FormState>();
 
@@ -50,7 +48,7 @@ class _PacienteScreanState extends State<PacienteScrean> {
 
     if (index >= 0) {
       debugPrint('EDITAR INDEX = $index');
-      Paciente pacienteExistente = PacienteDAO.getPaciente(index);
+      Paciente pacienteExistente = widget.paciente!;
 
       _paciente = Paciente(
         index,
@@ -74,10 +72,8 @@ class _PacienteScreanState extends State<PacienteScrean> {
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       appBar: AppBar(backgroundColor: Colors.blue, title: Text('ADD PACIENTE')),
       body: SingleChildScrollView(
@@ -151,11 +147,11 @@ class _PacienteScreanState extends State<PacienteScrean> {
                 width: double.infinity,
                 child: ElevatedButton(
                   style: ButtonStyle(
-                    padding: MaterialStateProperty.all<EdgeInsets>(
+                    padding: WidgetStateProperty.all<EdgeInsets>(
                       EdgeInsets.all(18),
                     ),
-                    elevation: MaterialStateProperty.all(8),
-                    backgroundColor: MaterialStateProperty.all<Color>(
+                    elevation: WidgetStateProperty.all(8),
+                    backgroundColor: WidgetStateProperty.all<Color>(
                       Colors.lightBlue,
                     ),
                   ),
@@ -163,23 +159,22 @@ class _PacienteScreanState extends State<PacienteScrean> {
                     if (_formKey.currentState!.validate()) {
                       int index = widget.index ?? -1;
                       Paciente p = new Paciente(
-                          index,
+                        index,
                         this._nomeController.text,
                         this._emailController.text,
                         this._cartaoController.text,
                         int.tryParse(this._idadeController.text) ?? 0,
                         this._senhaController.text,
-                        this._fotoPerfil
+                        this._fotoPerfil,
                       );
 
                       if (index >= 0) {
-                        PacienteDAO.atualizar(p);
+                        PacienteDAO().atualizar(p);
                         Navigator.of(context).pop();
-                      }else {
-                        PacienteDAO.adicionar(p);
+                      } else {
+                        PacienteDAO().adicionar(p);
                         Navigator.of(context).pop();
                       }
-
                     } else {
                       debugPrint('Formulário inválido');
                     }
@@ -205,15 +200,13 @@ class _PacienteScreanState extends State<PacienteScrean> {
       },
       child: CircleAvatar(
         radius: 65,
-        backgroundImage: _fotoPerfil.isNotEmpty && File(_fotoPerfil).existsSync()
-            ? FileImage(File(_fotoPerfil))
-            : AssetImage('imagens/camera.png') as ImageProvider,
+        backgroundImage:
+            _fotoPerfil.isNotEmpty && File(_fotoPerfil).existsSync()
+                ? FileImage(File(_fotoPerfil))
+                : AssetImage('imagens/camera.png') as ImageProvider,
         child: Align(
           alignment: Alignment.bottomRight,
-          child: Icon(
-            Icons.camera_alt,
-            color: Colors.white,
-          ),
+          child: Icon(Icons.camera_alt, color: Colors.white),
         ),
       ),
     );
@@ -296,9 +289,9 @@ class _PacienteScreanState extends State<PacienteScrean> {
     } catch (e, stackTrace) {
       debugPrint('Erro ao obter ou cortar imagem: $e');
       debugPrint('StackTrace: $stackTrace');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erro ao processar a imagem: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Erro ao processar a imagem: $e')));
     }
   }
 }

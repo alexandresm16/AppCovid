@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'model/Paciente.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
 
   _gerarPacientes(){
     Paciente p = Paciente(
@@ -49,12 +50,16 @@ void main() {
       ''
     );
 
-    PacienteDAO.adicionar(p);
-    PacienteDAO.adicionar(p1);
-    PacienteDAO.adicionar(p2);
-    PacienteDAO.adicionar(p3);
+    //  PacienteDAO().adicionar(p);
+
   }
 
+
+  PacienteDAO().getPacientes().then((value) {
+    for(Paciente p in value){
+      debugPrint('Paciente nome: '+p.nome + p.id.toString());
+    }
+  });
 
   if(Platform.isAndroid){
     debugPrint('app no android');

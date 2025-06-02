@@ -13,8 +13,8 @@ class ChecklistSintomas extends StatelessWidget {
 
   final _formKey = GlobalKey<FormState>();
 
-  ChecklistSintomas({required int idpaciente}){
-    this._paciente = PacienteDAO.getPaciente(idpaciente);
+  ChecklistSintomas({required Paciente paciente}){
+    this._paciente = paciente;
 
     _isTosse = false;
     _isDorGarganta = false;

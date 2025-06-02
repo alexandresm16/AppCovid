@@ -33,6 +33,7 @@ dependencies:
   camera:
   path_provider:
   path:
+  sqflite:
   image_picker: ^1.1.2
   image_cropper: ^9.1.0
   permission_handler: ^11.0.0
