@@ -54,6 +54,46 @@ class CheckSintomasDAO {
   static const String _col_senha = 'senha';
   static const String _col_foto = 'foto';
 
+
+  Future<List<CheckSintomasModel>> getTodosCasosSuspeitos() async {
+    final Database db = await getDatabase();
+    final List<Map<String, dynamic>> maps = await db.rawQuery(
+        '''
+    SELECT * FROM $_nomeTabela cs
+    JOIN $_nomeTabelaPaciente p ON cs.idpaciente = p.id
+    WHERE cs.casosuspeito = 1
+    '''
+    );
+
+    return List.generate(maps.length, (i) {
+      Paciente paciente = Paciente(
+        maps[i][_col_idP],
+        maps[i][_col_nome],
+        maps[i][_col_email],
+        maps[i][_col_cartao],
+        maps[i][_col_idade],
+        maps[i][_col_senha],
+        maps[i][_col_foto],
+      );
+
+      return CheckSintomasModel(
+        maps[i][_col_id],
+        paciente,
+        maps[i][_col_temp],
+        maps[i][_col_qtdDias],
+        maps[i][_col_isNarizEntupido] == 1,
+        maps[i][_col_isDorGarganta] == 1,
+        maps[i][_col_isRouquidao] == 1,
+        maps[i][_col_isCatarro] == 1,
+        maps[i][_col_isTosse] == 1,
+        DateTime.parse(maps[i][_col_dataAvaliacao]),
+        maps[i][_col_isCasoSuspeito] == 1,
+      );
+    });
+  }
+
+
+
   Future <List<CheckSintomasModel>> getPacienteCheckSintomas(Paciente p) async {
 
     final Database db = await getDatabase();

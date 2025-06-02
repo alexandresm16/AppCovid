@@ -1,5 +1,6 @@
 import 'package:aula/screens/android/login_screen.dart';
 import 'package:aula/screens/android/paciente/paciente_list.dart';
+import 'package:aula/screens/android/resultados/resultados.dart';
 import 'package:flutter/material.dart';
 
 class Dashbord extends StatelessWidget {
@@ -47,6 +48,9 @@ class Dashbord extends StatelessWidget {
                     'RESULTADOS',
                     Icons.check_circle_outline,
                     onClick: () {
+                      Navigator.of(context).push(MaterialPageRoute(
+                          builder: (context) => Resultados(),
+                      ));
                       debugPrint('Resultados........');
                     },
                   ),

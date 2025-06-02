@@ -5,6 +5,7 @@ import 'package:aula/database/check_sintomasDAO.dart';
 import 'package:aula/database/paciente_dao.dart';
 import 'package:aula/model/Check_sintomas.dart';
 import 'package:aula/model/Paciente.dart';
+import 'package:aula/screens/android/paciente/paciente_sintomas.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -204,11 +205,23 @@ class ItemPaciente extends StatelessWidget {
 
             if(sintomas.length > 0){
 
+              Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) => PacienteSintomas(sintomas: sintomas)
+              ));
               for(CheckSintomasModel csm in sintomas){
                 print(csm);
               }
 
             } else {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Nenhum registro encontrado para este paciente.'),
+                  duration: Duration(seconds: 3),
+                  behavior: SnackBarBehavior.floating,
+                  backgroundColor: Colors.amber,
+                ),
+              );
+
               print('Nenhum registro encontrado');
             }
 
